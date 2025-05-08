@@ -1,26 +1,23 @@
 // src/components/Navbar.js
 import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import {
-  AppBar,
-  Box,
-  Toolbar,
-  IconButton,
-  Typography,
+import { 
+  AppBar, 
+  Box, 
+  Toolbar, 
+  Typography, 
+  IconButton, 
+  Button, 
+  Container,
   Menu,
   MenuItem,
-  Container,
-  Avatar,
-  Button,
   Tooltip,
-  Link,
-  useMediaQuery
+  Avatar
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { logoutUser } from '../services/api';
 
 const Navbar = ({ user, setUser }) => {
   const theme = useTheme();
@@ -29,7 +26,7 @@ const Navbar = ({ user, setUser }) => {
   
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
-
+  
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -37,28 +34,33 @@ const Navbar = ({ user, setUser }) => {
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-
+  
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
-
+  
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
 
-  const handleLogout = () => {
-    setUser(null);
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      setUser(null);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     handleCloseUserMenu();
-    navigate('/');
   };
 
   return (
-    <AppBar position="static" elevation={0} color="transparent">
+    <AppBar position="static" sx={{ backgroundColor: '#3a6ea8' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          {/* Logo - Desktop */}
+          {/* Logo for desktop */}
           <Typography
-            variant="h5"
+            variant="h6"
             noWrap
             component={RouterLink}
             to="/"
@@ -66,24 +68,17 @@ const Navbar = ({ user, setUser }) => {
               mr: 2,
               display: { xs: 'none', md: 'flex' },
               fontWeight: 700,
-              letterSpacing: '.02rem',
+              color: 'white',
               textDecoration: 'none',
-              background: 'linear-gradient(135deg, #5e8bff 0%, #3a6ae8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              '&:hover': {
-                opacity: 0.8,
-              }
             }}
           >
             MediaFinder
           </Typography>
 
-          {/* Mobile menu */}
+          {/* Mobile menu icon */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              aria-label="menu"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -109,19 +104,24 @@ const Navbar = ({ user, setUser }) => {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              <MenuItem onClick={handleCloseNavMenu} component={RouterLink} to="/">
+              <MenuItem onClick={() => { handleCloseNavMenu(); navigate('/'); }}>
                 <Typography textAlign="center">Home</Typography>
               </MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component={RouterLink} to="/about">
+              <MenuItem onClick={() => { handleCloseNavMenu(); navigate('/about'); }}>
                 <Typography textAlign="center">About</Typography>
               </MenuItem>
-              <MenuItem onClick={handleCloseNavMenu} component={RouterLink} to="/contact">
+              <MenuItem onClick={() => { handleCloseNavMenu(); navigate('/contact'); }}>
                 <Typography textAlign="center">Contact</Typography>
               </MenuItem>
+              {!user && (
+                <MenuItem onClick={() => { handleCloseNavMenu(); navigate('/register'); }}>
+                  <Typography textAlign="center">Register</Typography>
+                </MenuItem>
+              )}
             </Menu>
           </Box>
-
-          {/* Logo - Mobile */}
+          
+          {/* Logo for mobile */}
           <Typography
             variant="h6"
             noWrap
@@ -132,23 +132,23 @@ const Navbar = ({ user, setUser }) => {
               display: { xs: 'flex', md: 'none' },
               flexGrow: 1,
               fontWeight: 700,
-              letterSpacing: '.02rem',
+              color: 'white',
               textDecoration: 'none',
-              background: 'linear-gradient(135deg, #5e8bff 0%, #3a6ae8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
             }}
           >
             MediaFinder
           </Typography>
-
-          {/* Desktop menu */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          
+          {/* Desktop navigation */}
+          <Box sx={{ 
+            flexGrow: 1, 
+            display: { xs: 'none', md: 'flex' }
+          }}>
             <Button
               component={RouterLink}
               to="/"
               onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: 'text.primary', display: 'block', mx: 1 }}
+              sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}
             >
               Home
             </Button>
@@ -156,7 +156,7 @@ const Navbar = ({ user, setUser }) => {
               component={RouterLink}
               to="/about"
               onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: 'text.primary', display: 'block', mx: 1 }}
+              sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}
             >
               About
             </Button>
@@ -164,22 +164,10 @@ const Navbar = ({ user, setUser }) => {
               component={RouterLink}
               to="/contact"
               onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: 'text.primary', display: 'block', mx: 1 }}
+              sx={{ my: 2, color: 'white', display: 'block', mx: 1 }}
             >
               Contact
             </Button>
-          </Box>
-
-          {/* Search icon */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-            <IconButton
-              size="large"
-              aria-label="search"
-              color="inherit"
-              onClick={() => navigate('/')}
-            >
-              <SearchIcon />
-            </IconButton>
           </Box>
 
           {/* User menu */}
@@ -188,16 +176,8 @@ const Navbar = ({ user, setUser }) => {
               <>
                 <Tooltip title="Open settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar
-                      alt={user.username}
-                      src={user.avatar}
-                      sx={{ 
-                        bgcolor: 'primary.main',
-                        border: '2px solid white',
-                        boxShadow: '0 2px 8px rgba(94, 139, 255, 0.2)'
-                      }}
-                    >
-                      {user.username ? user.username[0].toUpperCase() : <AccountCircleIcon />}
+                    <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                      {user.username ? user.username[0].toUpperCase() : 'U'}
                     </Avatar>
                   </IconButton>
                 </Tooltip>
@@ -217,14 +197,12 @@ const Navbar = ({ user, setUser }) => {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  <MenuItem onClick={handleCloseUserMenu} component={RouterLink} to="/profile">
+                  <MenuItem onClick={handleCloseUserMenu}>
                     <Typography textAlign="center">Profile</Typography>
                   </MenuItem>
-                  {user && user.isAdmin && (
-                    <MenuItem onClick={handleCloseUserMenu} component={RouterLink} to="/admin">
-                      <Typography textAlign="center">Admin Dashboard</Typography>
-                    </MenuItem>
-                  )}
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">My Searches</Typography>
+                  </MenuItem>
                   <MenuItem onClick={handleLogout}>
                     <Typography textAlign="center">Logout</Typography>
                   </MenuItem>
@@ -233,31 +211,34 @@ const Navbar = ({ user, setUser }) => {
             ) : (
               <Box sx={{ display: 'flex' }}>
                 <Button 
-                  component={RouterLink} 
+                  component={RouterLink}
                   to="/login"
                   sx={{ 
-                    mx: 1,
-                    color: 'text.primary',
+                    color: 'white', 
+                    fontWeight: 500,
+                    mr: 1,
                     '&:hover': {
-                      backgroundColor: 'rgba(94, 139, 255, 0.08)'
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     }
                   }}
                 >
                   Login
                 </Button>
                 <Button 
-                  component={RouterLink} 
+                  component={RouterLink}
                   to="/register"
-                  variant="contained"
+                  variant="outlined"
                   sx={{ 
-                    mx: 1,
-                    boxShadow: '0 4px 12px rgba(94, 139, 255, 0.15)',
+                    color: 'white', 
+                    fontWeight: 500,
+                    borderColor: 'white',
                     '&:hover': {
-                      boxShadow: '0 6px 16px rgba(94, 139, 255, 0.2)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderColor: 'white',
                     }
                   }}
                 >
-                  Sign Up
+                  Register
                 </Button>
               </Box>
             )}
